@@ -58,6 +58,23 @@ func MakeRaw(fd int) (*State, error) {
 	return &oldState, nil
 }
 
+// EnableOPOST sets OPOST (postprocessing) flag back to raw terminal
+// created by MakeRaw.
+func EnableOPOST(fd int) (error) {
+	oldState, err := GetState(fd)
+	if err != nil {
+		return err
+	}
+
+	newState := *oldState
+	newState.termios.Oflag |= syscall.OPOST
+	err = Restore(fd, &newState)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // GetState returns the current state of a terminal which may be useful to
 // restore the terminal after a signal.
 func GetState(fd int) (*State, error) {
